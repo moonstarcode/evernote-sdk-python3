@@ -58,14 +58,17 @@ class EvernoteClient(object):
             urllib.parse.quote(request_token['oauth_token'])
         )
 
-    def get_access_token(self, oauth_token,
-                         oauth_token_secret, oauth_verifier, return_full_dict=False):
+    def get_access_token(self, oauth_token, oauth_verifier, oauth_token_secret='', return_full_dict=False):
         token = oauth.Token(oauth_token, oauth_token_secret)
         token.set_verifier(oauth_verifier)
         client = self._get_oauth_client(token)
 
+        if not oauth_token_secret:
+            client.set_signature_method(oauth.SignatureMethod_PLAINTEXT())
+        # client.set_signature_method(oauth.Si)
         resp, content = client.request(self._get_endpoint('oauth'), 'POST')
-        access_token_dict = dict(urllib.parse.parse_qsl(content.decode('utf-8')))
+        access_token_dict = dict(
+            urllib.parse.parse_qsl(content.decode('utf-8')))
         self.token = access_token_dict['oauth_token']
 
         if return_full_dict:
